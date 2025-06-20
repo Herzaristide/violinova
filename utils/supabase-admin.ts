@@ -178,9 +178,9 @@ const copyBillingDetailsToCustomer = async (
 //     );
 // };
 
-// export {
-//   upsertProductRecord,
-//   upsertPriceRecord,
-//   createOrRetrieveCustomer,
-//   manageSubscriptionStatusChange
-// };
+export {
+  upsertProductRecord,
+  upsertPriceRecord
+  // createOrRetrieveCustomer,
+  // manageSubscriptionStatusChange
+};
