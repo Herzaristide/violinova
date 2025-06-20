@@ -20,10 +20,10 @@ export default async function CourseLayout({
 
   return (
     <div className="flex flex-col md:flex-row w-full h-full">
-      <CoursesList
+      {/* <CoursesList
         courses={courses}
         subscription={subscription?.prices?.products?.name}
-      />
+      /> */}
       {children}
     </div>
   );
