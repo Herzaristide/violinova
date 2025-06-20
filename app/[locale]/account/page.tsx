@@ -109,7 +109,7 @@ export default async function Account({ params: { locale } }: { params: any }) {
           }
         >
           <div className="mt-8 mb-4 text-xl font-semibold">
-            <form id="nameForm" action={updateName}>
+            {/* <form id="nameForm" action={updateName}>
               <input
                 type="text"
                 name="name"
@@ -118,7 +118,7 @@ export default async function Account({ params: { locale } }: { params: any }) {
                 placeholder="Your name"
                 maxLength={64}
               />
-            </form>
+            </form> */}
           </div>
         </Card>
         <Card
