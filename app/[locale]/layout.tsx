@@ -1,14 +1,13 @@
-import SupabaseProvider from '../supabase-provider';
 import LeftBar from '@/components/ui/LeftBar';
 import Rightbar from '@/components/ui/RightBar';
 import { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import 'styles/main.css';
-import localFont from 'next/font/local';
-import { unstable_setRequestLocale } from 'next-intl/server';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { unstable_setRequestLocale } from 'next-intl/server';
+import localFont from 'next/font/local';
 
 const meta = {
   title: 'Next.js Subscription Starter',
@@ -80,16 +79,15 @@ export default async function RootLayout({
         className={`h-screen w-screen p-4 box-border ${avenir.className}`}
       >
         <body className="h-full w-full flex flex-col-reverse md:flex-row gap-4 box-border">
-          <SupabaseProvider>
-            <LeftBar />
-            <main className="w-full h-full overflow-hidden">
-              {children}
-              <Analytics />
-              <SpeedInsights />
-            </main>
-            {/* @ts-expect-error Async Server Component */}
-            <Rightbar />
-          </SupabaseProvider>
+          {/* <SupabaseProvider> */}
+          {/* <LeftBar /> */}
+          <main className="w-full h-full overflow-hidden">
+            {children}
+            <Analytics />
+            <SpeedInsights />
+          </main>
+          {/* <Rightbar /> */}
+          {/* </SupabaseProvider> */}
         </body>
       </html>
     </NextIntlClientProvider>
