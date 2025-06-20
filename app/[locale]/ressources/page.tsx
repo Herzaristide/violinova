@@ -21,10 +21,10 @@ export default async function RessourcesPage({
 
   return (
     <div className="flex md:hidden w-full h-full">
-      <RessourcesList
+      {/* <RessourcesList
         ressources={ressources}
         subscription={subscription?.prices?.products?.name}
-      />
+      /> */}
     </div>
   );
 }

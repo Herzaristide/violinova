@@ -21,10 +21,10 @@ export default async function CoursesPage({
 
   return (
     <div className="flex md:hidden w-full">
-      <CoursesList
+      {/* <CoursesList
         courses={courses}
         subscription={subscription?.prices?.products?.name}
-      />
+      /> */}
     </div>
   );
 }

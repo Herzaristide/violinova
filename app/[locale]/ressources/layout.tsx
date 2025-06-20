@@ -20,10 +20,10 @@ export default async function RessourceLayout({
 
   return (
     <div className="flex flex-col md:flex-row gap-4 w-full h-full">
-      <RessourcesList
+      {/* <RessourcesList
         ressources={ressources}
         subscription={subscription?.prices?.products?.name}
-      />
+      /> */}
       {children}
     </div>
   );

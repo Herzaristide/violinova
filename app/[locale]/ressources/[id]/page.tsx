@@ -16,7 +16,7 @@ export default async function RessourcePage({
 
   return (
     <div className="flex w-full h-full">
-      {ressource ? (
+      {/* {ressource ? (
         <div className="flex flex-col w-full">
           <div className="flex w-full items-center gap-4 border-[#df744a] rounded-full border-2 border-solid text-[#eae1d6] text-[24px] p-2 pr-4">
             <PreviouButton />
@@ -26,8 +26,8 @@ export default async function RessourcePage({
             <h1 className=" capitalize text-center">{ressource.difficulty}</h1>
           </div>
           <RessourceRender ressource={ressource} />
-        </div>
-      ) : (
+        </div> */}
+      {/* ) : (
         <div className="flex flex-col w-full">
           <div className="flex w-fit items-center gap-4 border-[#df744a] rounded-full border-2 border-solid text-[#eae1d6] text-[24px] p-2 pr-4">
             <PreviouButton />
@@ -37,7 +37,7 @@ export default async function RessourcePage({
           <h1>Hummm this ressource seems to be paid</h1>
           <Link href={'/pricing'}>Go to store</Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
