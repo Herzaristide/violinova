@@ -199,8 +199,8 @@ export default function Tuner() {
     const now = Date.now();
     const firstIdx = Math.max(0, total - 300);
     const relativeIdx = idx - firstIdx;
-    // Notes enter at 100% and leave at 0% over scrollDuration ms
-    const percent = 100 - (relativeIdx / 300) * 100;
+    // Notes enter at 100% (right) and leave at 0% (left) over scrollDuration ms
+    const percent = (relativeIdx / 300) * 100;
     return `calc(${percent}% - 4px)`;
   }
 
