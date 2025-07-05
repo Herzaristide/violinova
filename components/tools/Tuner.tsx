@@ -1,7 +1,7 @@
 'use client';
 
 import { usePitchDetection } from '../../utils/usePitchDetection';
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import MusicalStaff from './tuner/MusicalStaff';
 
 function frequencyToNote(freq: any) {
@@ -64,7 +64,6 @@ export default function Tuner() {
       isTick?: boolean;
     }>
   >([]);
-  const [showMusicalStaff, setShowMusicalStaff] = useState(true);
 
   // Metronome state
   const [bpm, setBpm] = useState(60);
@@ -159,12 +158,6 @@ export default function Tuner() {
             }`}
           >
             {metronomeEnabled ? 'Stop' : 'Start'}
-          </button>
-          <button
-            onClick={() => setShowMusicalStaff(!showMusicalStaff)}
-            className="px-3 py-1 rounded text-xs font-bold border bg-purple-500 border-purple-700 text-white hover:bg-purple-600"
-          >
-            {showMusicalStaff ? 'Chart' : 'Staff'}
           </button>
         </div>
       </div>
