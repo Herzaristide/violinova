@@ -1,60 +1,11 @@
 'use client';
 
+import React from 'react';
 import { usePitchDetection } from '../../utils/usePitchDetection';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import MusicalStaff from './tuner/MusicalStaff';
 
-function frequencyToNote(freq: any) {
-  if (!freq) return '--';
-  const A4 = 442;
-  const semitones = 12 * Math.log2(freq / A4);
-  const noteIndex = Math.round(semitones) + 57;
-  const notes = [
-    'C',
-    'C♯',
-    'D',
-    'D♯',
-    'E',
-    'F',
-    'F♯',
-    'G',
-    'G♯',
-    'A',
-    'A♯',
-    'B'
-  ];
-  const note = notes[noteIndex % 12];
-  const octave = Math.floor(noteIndex / 12);
-  return `${note}${octave}`;
-}
-
-function noteAccuracy(freq: number | null) {
-  if (!freq) return '--';
-  const A4 = 442;
-  const semitones = 12 * Math.log2(freq / A4);
-  const nearest = Math.round(semitones);
-  const nearestFreq = A4 * Math.pow(2, nearest / 12);
-  const cents = 1200 * Math.log2(freq / nearestFreq);
-  return `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-}
-
-// Helper to get color based on accuracy (cents)
-const accuracyColor = (freq: number | null) => {
-  if (!freq) return 'bg-gray-400';
-  const A4 = 442;
-  const semitones = 12 * Math.log2(freq / A4);
-  const nearest = Math.round(semitones);
-  const nearestFreq = A4 * Math.pow(2, nearest / 12);
-  const cents = 1200 * Math.log2(freq / nearestFreq);
-  const absCents = Math.abs(cents);
-
-  if (absCents < 5) return 'bg-green-500';
-  if (absCents < 15) return 'bg-yellow-400';
-  if (absCents < 30) return 'bg-orange-400';
-  return 'bg-red-500';
-};
-
-export default function Tuner() {
+const Tuner = React.memo(() => {
   const { freq, clarity } = usePitchDetection();
   const [latestNotes, setLatestNotes] = useState<
     Array<{
@@ -70,6 +21,66 @@ export default function Tuner() {
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
   const metronomeInterval = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Memoized helper functions to prevent recreating on every render
+  const frequencyToNote = useMemo(
+    () => (freq: number | null) => {
+      if (!freq) return '--';
+      const A4 = 442;
+      const semitones = 12 * Math.log2(freq / A4);
+      const noteIndex = Math.round(semitones) + 57;
+      const notes = [
+        'C',
+        'C♯',
+        'D',
+        'D♯',
+        'E',
+        'F',
+        'F♯',
+        'G',
+        'G♯',
+        'A',
+        'A♯',
+        'B'
+      ];
+      const note = notes[noteIndex % 12];
+      const octave = Math.floor(noteIndex / 12);
+      return `${note}${octave}`;
+    },
+    []
+  );
+
+  const noteAccuracy = useMemo(
+    () => (freq: number | null) => {
+      if (!freq) return '--';
+      const A4 = 442;
+      const semitones = 12 * Math.log2(freq / A4);
+      const nearest = Math.round(semitones);
+      const nearestFreq = A4 * Math.pow(2, nearest / 12);
+      const cents = 1200 * Math.log2(freq / nearestFreq);
+      return `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
+    },
+    []
+  );
+
+  // Memoized color function to prevent recalculation
+  const accuracyColor = useMemo(
+    () => (freq: number | null) => {
+      if (!freq) return 'bg-gray-400';
+      const A4 = 442;
+      const semitones = 12 * Math.log2(freq / A4);
+      const nearest = Math.round(semitones);
+      const nearestFreq = A4 * Math.pow(2, nearest / 12);
+      const cents = 1200 * Math.log2(freq / nearestFreq);
+      const absCents = Math.abs(cents);
+
+      if (absCents < 5) return 'bg-green-500';
+      if (absCents < 15) return 'bg-yellow-400';
+      if (absCents < 30) return 'bg-orange-400';
+      return 'bg-red-500';
+    },
+    []
+  );
 
   // Memoized functions
   const playMetronomeTick = useCallback(() => {
@@ -94,37 +105,51 @@ export default function Tuner() {
     return `calc(${percent}% - 4px)`;
   }, []);
 
-  // Store the latest notes
+  // Store the latest notes with throttling to prevent excessive updates
+  const addNoteRef = useRef<number>(0);
   useEffect(() => {
     if (!freq) return;
+
+    // Throttle note additions to max 30fps
+    const now = Date.now();
+    if (now - addNoteRef.current < 33) return;
+    addNoteRef.current = now;
+
     const note = frequencyToNote(freq);
     setLatestNotes((prev) => {
       const newNotes = [...prev, { note, freq, clarity }];
       return newNotes.length > 300 ? newNotes.slice(-300) : newNotes;
     });
-  }, [freq, clarity]);
+  }, [freq, clarity, frequencyToNote]);
 
-  // Metronome effect
+  // Optimized metronome effect
   useEffect(() => {
-    if (metronomeInterval.current) clearInterval(metronomeInterval.current);
+    if (metronomeInterval.current) {
+      clearInterval(metronomeInterval.current);
+      metronomeInterval.current = null;
+    }
 
     if (!metronomeEnabled) return;
 
+    const interval = 60000 / bpm;
     metronomeInterval.current = setInterval(() => {
       playMetronomeTick();
       setLatestNotes((prev) => {
         if (prev.length === 0) return prev;
         const newNotes = [...prev];
-        newNotes[newNotes.length - 1] = {
-          ...newNotes[newNotes.length - 1],
-          isTick: true
-        };
+        const lastIndex = newNotes.length - 1;
+        if (lastIndex >= 0) {
+          newNotes[lastIndex] = { ...newNotes[lastIndex], isTick: true };
+        }
         return newNotes;
       });
-    }, 60000 / bpm);
+    }, interval);
 
     return () => {
-      if (metronomeInterval.current) clearInterval(metronomeInterval.current);
+      if (metronomeInterval.current) {
+        clearInterval(metronomeInterval.current);
+        metronomeInterval.current = null;
+      }
     };
   }, [bpm, metronomeEnabled, playMetronomeTick]);
 
@@ -171,4 +196,8 @@ export default function Tuner() {
       </div>
     </div>
   );
-}
+});
+
+Tuner.displayName = 'Tuner';
+
+export default Tuner;
