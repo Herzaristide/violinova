@@ -101,7 +101,8 @@ const Tuner = React.memo(() => {
 
   const getNoteLeft = useCallback((idx: number, total: number) => {
     const relativeIdx = idx - Math.max(0, total - 300);
-    const percent = (relativeIdx / 300) * 100;
+    // Make latest notes appear at 80%, older notes scroll left to 0%
+    const percent = (relativeIdx / 300) * 80;
     return `calc(${percent}% - 4px)`;
   }, []);
 
