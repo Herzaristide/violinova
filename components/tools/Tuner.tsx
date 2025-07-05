@@ -35,94 +35,80 @@ const Tuner = React.memo(() => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const beatCountRef = useRef<number>(0);
 
-  // Memoized helper functions to prevent recreating on every render
-  const frequencyToNote = useMemo(
-    () => (freq: number | null) => {
-      if (!freq) return '--';
-      const A4 = 442;
-      const semitones = 12 * Math.log2(freq / A4);
-      const noteIndex = Math.round(semitones) + 57;
-      const notes = [
-        'C',
-        'C♯',
-        'D',
-        'D♯',
-        'E',
-        'F',
-        'F♯',
-        'G',
-        'G♯',
-        'A',
-        'A♯',
-        'B'
-      ];
-      const note = notes[noteIndex % 12];
-      const octave = Math.floor(noteIndex / 12);
-      return `${note}${octave}`;
-    },
-    []
-  );
+  // Simplified helper functions
+  const frequencyToNote = useCallback((freq: number | null) => {
+    if (!freq) return '--';
+    const A4 = 442;
+    const semitones = 12 * Math.log2(freq / A4);
+    const noteIndex = Math.round(semitones) + 57;
+    const notes = [
+      'C',
+      'C♯',
+      'D',
+      'D♯',
+      'E',
+      'F',
+      'F♯',
+      'G',
+      'G♯',
+      'A',
+      'A♯',
+      'B'
+    ];
+    const note = notes[noteIndex % 12];
+    const octave = Math.floor(noteIndex / 12);
+    return `${note}${octave}`;
+  }, []);
 
-  const noteAccuracy = useMemo(
-    () => (freq: number | null) => {
-      if (!freq) return '--';
-      const A4 = 442;
-      const semitones = 12 * Math.log2(freq / A4);
-      const nearest = Math.round(semitones);
-      const nearestFreq = A4 * Math.pow(2, nearest / 12);
-      const cents = 1200 * Math.log2(freq / nearestFreq);
-      return `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-    },
-    []
-  );
+  const noteAccuracy = useCallback((freq: number | null) => {
+    if (!freq) return '--';
+    const A4 = 442;
+    const semitones = 12 * Math.log2(freq / A4);
+    const nearest = Math.round(semitones);
+    const nearestFreq = A4 * Math.pow(2, nearest / 12);
+    const cents = 1200 * Math.log2(freq / nearestFreq);
+    return `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
+  }, []);
 
-  // Memoized color function to prevent recalculation
-  const accuracyColor = useMemo(
-    () => (freq: number | null) => {
-      if (!freq) return 'bg-gray-400';
-      const A4 = 442;
-      const semitones = 12 * Math.log2(freq / A4);
-      const nearest = Math.round(semitones);
-      const nearestFreq = A4 * Math.pow(2, nearest / 12);
-      const cents = 1200 * Math.log2(freq / nearestFreq);
-      const absCents = Math.abs(cents);
+  const accuracyColor = useCallback((freq: number | null) => {
+    if (!freq) return 'bg-gray-400';
+    const A4 = 442;
+    const semitones = 12 * Math.log2(freq / A4);
+    const nearest = Math.round(semitones);
+    const nearestFreq = A4 * Math.pow(2, nearest / 12);
+    const cents = Math.abs(1200 * Math.log2(freq / nearestFreq));
 
-      if (absCents < 5) return 'bg-green-500';
-      if (absCents < 15) return 'bg-yellow-400';
-      if (absCents < 30) return 'bg-orange-400';
-      return 'bg-red-500';
-    },
-    []
-  );
+    if (cents < 5) return 'bg-green-500';
+    if (cents < 15) return 'bg-yellow-400';
+    if (cents < 30) return 'bg-orange-400';
+    return 'bg-red-500';
+  }, []);
 
-  // Enhanced metronome tick sound with different options
+  // Simplified metronome sound generation
   const playMetronomeTick = useCallback(
     (isAccent = false) => {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
       }
+
       const ctx = audioCtxRef.current;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      // Different sounds based on selection
-      switch (metronomeSound) {
-        case 'beep':
-          osc.type = 'sine';
-          osc.frequency.value = isAccent ? 1200 : 800;
-          break;
-        case 'wood':
-          osc.type = 'triangle';
-          osc.frequency.value = isAccent ? 2000 : 1500;
-          break;
-        default: // 'click'
-          osc.type = 'square';
-          osc.frequency.value = isAccent ? 1200 : 1000;
-          break;
-      }
+      // Simplified sound configuration
+      const sounds = {
+        click: { type: 'square', freq: isAccent ? 1200 : 1000 },
+        beep: { type: 'sine', freq: isAccent ? 1200 : 800 },
+        wood: { type: 'triangle', freq: isAccent ? 2000 : 1500 }
+      } as const;
 
+      const sound =
+        sounds[metronomeSound as keyof typeof sounds] || sounds.click;
+      osc.type = sound.type;
+      osc.frequency.value = sound.freq;
       gain.gain.value = isAccent ? metronomeVolume * 1.5 : metronomeVolume;
+
       osc.connect(gain).connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + (isAccent ? 0.1 : 0.07));
@@ -131,13 +117,11 @@ const Tuner = React.memo(() => {
   );
 
   const getNoteLeft = useCallback((idx: number, total: number) => {
-    const relativeIdx = idx - Math.max(0, total - 250); // Updated for smaller buffer
-    // Make latest notes appear at 80%, older notes scroll left to 0%
-    const percent = (relativeIdx / 250) * 80; // Updated denominator
+    const relativeIdx = idx - Math.max(0, total - 250);
+    const percent = (relativeIdx / 250) * 80;
     return `calc(${percent}% - 4px)`;
   }, []);
 
-  // Handle custom range changes
   const handleRangeChange = useCallback((lowNote: string, highNote: string) => {
     setCustomLowNote(lowNote);
     setCustomHighNote(highNote);
@@ -147,15 +131,13 @@ const Tuner = React.memo(() => {
   const addNoteRef = useRef<number>(0);
   const lastFreqRef = useRef<number>(0);
 
+  // Simplified note update logic
   useEffect(() => {
     if (!freq) return;
 
     const now = Date.now();
     const timeSinceLastUpdate = now - addNoteRef.current;
     const freqChange = Math.abs(freq - lastFreqRef.current);
-
-    // Immediate update for significant frequency changes (low latency for pitch changes)
-    // Or regular throttling at 60fps for stable frequencies
     const shouldUpdate = freqChange > 10 || timeSinceLastUpdate >= 16;
 
     if (!shouldUpdate) return;
@@ -166,12 +148,11 @@ const Tuner = React.memo(() => {
     const note = frequencyToNote(freq);
     setLatestNotes((prev) => {
       const newNotes = [...prev, { note, freq, clarity }];
-      // Reduce buffer size slightly for lower memory usage and faster processing
       return newNotes.length > 250 ? newNotes.slice(-250) : newNotes;
     });
   }, [freq, clarity, frequencyToNote]);
 
-  // Enhanced metronome effect with time signatures
+  // Simplified metronome effect
   useEffect(() => {
     if (metronomeInterval.current) {
       clearInterval(metronomeInterval.current);
@@ -188,11 +169,9 @@ const Tuner = React.memo(() => {
       const isAccent =
         accentEnabled && beatCountRef.current % beatsPerMeasure === 0;
       playMetronomeTick(isAccent);
-
       beatCountRef.current = (beatCountRef.current + 1) % beatsPerMeasure;
 
       setLatestNotes((prev) => {
-        if (prev.length === 0) return prev;
         const newNotes = [...prev];
         const lastIndex = newNotes.length - 1;
         if (lastIndex >= 0) {
@@ -210,7 +189,7 @@ const Tuner = React.memo(() => {
     };
   }, [bpm, metronomeEnabled, timeSignature, accentEnabled, playMetronomeTick]);
 
-  // Current note display (immediate, no throttling for real-time feedback)
+  // Current note display
   const currentNote = useMemo(
     () => frequencyToNote(freq),
     [freq, frequencyToNote]
