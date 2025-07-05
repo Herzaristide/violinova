@@ -23,6 +23,14 @@ const Tuner = React.memo(() => {
   const [accentEnabled, setAccentEnabled] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.2);
   const [metronomeSound, setMetronomeSound] = useState('click'); // 'click', 'beep', 'wood'
+
+  // Note range state
+  const [noteRange, setNoteRange] = useState<
+    'violin' | 'piano' | 'guitar' | 'bass' | 'custom'
+  >('violin');
+  const [customLowNote, setCustomLowNote] = useState('C3');
+  const [customHighNote, setCustomHighNote] = useState('C6');
+
   const metronomeInterval = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const beatCountRef = useRef<number>(0);
@@ -127,6 +135,12 @@ const Tuner = React.memo(() => {
     // Make latest notes appear at 80%, older notes scroll left to 0%
     const percent = (relativeIdx / 250) * 80; // Updated denominator
     return `calc(${percent}% - 4px)`;
+  }, []);
+
+  // Handle custom range changes
+  const handleRangeChange = useCallback((lowNote: string, highNote: string) => {
+    setCustomLowNote(lowNote);
+    setCustomHighNote(highNote);
   }, []);
 
   // Store the latest notes with minimal delay optimization
@@ -350,6 +364,32 @@ const Tuner = React.memo(() => {
                 title={`Volume: ${Math.round(metronomeVolume * 100)}%`}
               />
             </div>
+
+            {/* Note Range Selector */}
+            <div className="flex items-center gap-1">
+              <label className="text-white/80 text-xs">Range:</label>
+              <select
+                value={noteRange}
+                onChange={(e) => setNoteRange(e.target.value as any)}
+                className="bg-white/10 backdrop-blur-md text-white rounded-md px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200 text-xs"
+              >
+                <option value="violin" className="bg-gray-800">
+                  Violin
+                </option>
+                <option value="guitar" className="bg-gray-800">
+                  Guitar
+                </option>
+                <option value="bass" className="bg-gray-800">
+                  Bass
+                </option>
+                <option value="piano" className="bg-gray-800">
+                  Piano
+                </option>
+                <option value="custom" className="bg-gray-800">
+                  Custom
+                </option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -360,6 +400,10 @@ const Tuner = React.memo(() => {
           notes={latestNotes}
           accuracyColor={accuracyColor}
           getNoteLeft={getNoteLeft}
+          noteRange={noteRange}
+          customLowNote={customLowNote}
+          customHighNote={customHighNote}
+          onRangeChange={handleRangeChange}
         />
       </div>
     </div>
