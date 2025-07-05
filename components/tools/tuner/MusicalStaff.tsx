@@ -13,61 +13,109 @@ interface MusicalStaffProps {
   getNoteLeft: (idx: number, total: number) => string;
 }
 
-// Musical staff configuration with perfectly equal spacing
+// Musical staff configuration for full range A0-C8 with equal spacing
 const STAFF_LINES = [
-  { note: 'F5', position: 25 }, // Top line
-  { note: 'D5', position: 35 }, // 4th line
-  { note: 'B4', position: 45 }, // 3rd line (middle)
-  { note: 'G4', position: 55 }, // 2nd line
-  { note: 'E4', position: 65 } // Bottom line
-];
-
-const LEDGER_LINES = [
-  { note: 'C6', position: 5 }, // High ledger line
-  { note: 'A5', position: 15 }, // Above staff ledger
-  { note: 'C4', position: 75 }, // Below staff ledger
-  { note: 'A3', position: 85 }, // Below staff ledger
-  { note: 'F3', position: 95 } // Low ledger line
+  { note: 'C8', position: 5 }, // Highest line
+  { note: 'A7', position: 10 },
+  { note: 'F7', position: 15 },
+  { note: 'D7', position: 20 },
+  { note: 'B6', position: 25 },
+  { note: 'G6', position: 30 },
+  { note: 'E6', position: 35 },
+  { note: 'C6', position: 40 },
+  { note: 'A5', position: 45 },
+  { note: 'F5', position: 50 }, // Traditional top line
+  { note: 'D5', position: 55 }, // 4th line
+  { note: 'B4', position: 60 }, // 3rd line (middle)
+  { note: 'G4', position: 65 }, // 2nd line
+  { note: 'E4', position: 70 }, // Traditional bottom line
+  { note: 'C4', position: 75 },
+  { note: 'A3', position: 80 },
+  { note: 'F3', position: 85 },
+  { note: 'D3', position: 90 },
+  { note: 'B2', position: 95 },
+  { note: 'G2', position: 100 },
+  { note: 'E2', position: 105 },
+  { note: 'C2', position: 110 },
+  { note: 'A1', position: 115 },
+  { note: 'F1', position: 120 },
+  { note: 'D1', position: 125 },
+  { note: 'B0', position: 130 },
+  { note: 'A0', position: 135 } // Lowest line
 ];
 
 const NOTE_POSITIONS: { [key: string]: number } = {
-  C7: 0,
-  B6: 2.5,
-  A6: 5, // A6 ledger line
-  G6: 7.5,
-  F6: 10,
-  E6: 12.5,
-  D6: 15, // D6 ledger line
-  C6: 5, // High C ledger line
-  B5: 10, // Space above A5
-  A5: 15, // A5 ledger line
-  G5: 20, // Space above F5
-  F5: 25, // Top staff line
-  E5: 30, // Space between F5 and D5
-  D5: 35, // 4th staff line
-  C5: 40, // Space between D5 and B4
-  B4: 45, // 3rd staff line (middle)
-  A4: 50, // Space between B4 and G4
-  G4: 55, // 2nd staff line
-  F4: 60, // Space between G4 and E4
-  E4: 65, // Bottom staff line
-  D4: 70, // Space below E4
-  C4: 75, // C4 ledger line
-  B3: 80, // Space below C4
-  A3: 85, // A3 ledger line
-  G3: 90, // Space below A3
-  F3: 95, // F3 ledger line
-  E3: 100, // Space below F3
-  D3: 105, // Below staff
-  C3: 110, // Below staff
-  B2: 115, // Below staff
-  A2: 120, // Below staff
-  G2: 125 // Below staff
+  // Octave 8
+  C8: 5,
+  B7: 7.5,
+  A7: 10,
+  G7: 12.5,
+  F7: 15,
+  E7: 17.5,
+  D7: 20,
+  C7: 22.5,
+  // Octave 6-7
+  B6: 25,
+  A6: 27.5,
+  G6: 30,
+  F6: 32.5,
+  E6: 35,
+  D6: 37.5,
+  C6: 40,
+  B5: 42.5,
+  A5: 45,
+  G5: 47.5,
+  // Traditional treble staff (F5-E4)
+  F5: 50,
+  E5: 52.5,
+  D5: 55,
+  C5: 57.5,
+  B4: 60,
+  A4: 62.5,
+  G4: 65,
+  F4: 67.5,
+  E4: 70,
+  // Extended lower range
+  D4: 72.5,
+  C4: 75,
+  B3: 77.5,
+  A3: 80,
+  G3: 82.5,
+  F3: 85,
+  E3: 87.5,
+  D3: 90,
+  C3: 92.5,
+  B2: 95,
+  A2: 97.5,
+  G2: 100,
+  F2: 102.5,
+  E2: 105,
+  D2: 107.5,
+  C2: 110,
+  B1: 112.5,
+  A1: 115,
+  G1: 117.5,
+  F1: 120,
+  E1: 122.5,
+  D1: 125,
+  C1: 127.5,
+  B0: 130,
+  A0: 135
 };
 
 const getNotePosition = (note: string): number => {
   const baseNote = note.replace(/[♯♭#b]/g, '');
-  return NOTE_POSITIONS[baseNote] || 50;
+  const position = NOTE_POSITIONS[baseNote];
+
+  // If the note includes a sharp or flat, adjust position slightly
+  if (note.includes('♯') || note.includes('#')) {
+    return position ? position - 1.25 : 50; // Slightly higher for sharps
+  }
+  if (note.includes('♭') || note.includes('b')) {
+    return position ? position + 1.25 : 50; // Slightly lower for flats
+  }
+
+  return position || 50;
 };
 
 const getAccidental = (note: string): string | null => {
@@ -82,12 +130,17 @@ export default function MusicalStaff({
   getNoteLeft
 }: MusicalStaffProps) {
   return (
-    <div className="relative w-full h-64 bg-white rounded-lg overflow-hidden border-2 border-gray-300">
-      {/* Staff lines */}
+    <div className="relative w-full h-96 bg-white rounded-lg overflow-hidden border-2 border-gray-300">
+      {/* Range indicator */}
+      <div className="absolute top-2 left-2 text-xs text-gray-600 select-none">
+        Range: A0 - C8 (Full Piano Range)
+      </div>
+
+      {/* Extended staff lines for A0-C8 range */}
       {STAFF_LINES.map((line, idx) => (
         <div
           key={idx}
-          className="absolute left-0 w-full border-t-2 border-black"
+          className="absolute left-0 w-full border-t border-gray-400"
           style={{ top: `${line.position}%` }}
         >
           <span className="absolute right-2 -top-3 text-xs text-gray-600 select-none">
@@ -95,24 +148,6 @@ export default function MusicalStaff({
           </span>
         </div>
       ))}
-
-      {/* Ledger lines */}
-      {LEDGER_LINES.map((line, idx) => (
-        <div
-          key={idx}
-          className="absolute border-t-2 border-gray-500"
-          style={{ left: '60px', right: '20px', top: `${line.position}%` }}
-        >
-          <span className="absolute right-2 -top-3 text-xs text-gray-500 select-none">
-            {line.note}
-          </span>
-        </div>
-      ))}
-
-      {/* Treble clef */}
-      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[140px] font-bold text-black select-none">
-        𝄞
-      </div>
 
       {/* Notes */}
       {notes.map((item, idx) => {
@@ -138,7 +173,7 @@ export default function MusicalStaff({
               </span>
             )}
             <div
-              className={`w-1 h-6 ${accuracyColor(item.freq)}`}
+              className={`w-0.5 h-4 ${accuracyColor(item.freq)}`}
               title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
             />
           </div>
