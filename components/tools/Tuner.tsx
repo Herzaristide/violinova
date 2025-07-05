@@ -100,26 +100,37 @@ const Tuner = React.memo(() => {
   }, []);
 
   const getNoteLeft = useCallback((idx: number, total: number) => {
-    const relativeIdx = idx - Math.max(0, total - 300);
+    const relativeIdx = idx - Math.max(0, total - 250); // Updated for smaller buffer
     // Make latest notes appear at 80%, older notes scroll left to 0%
-    const percent = (relativeIdx / 300) * 80;
+    const percent = (relativeIdx / 250) * 80; // Updated denominator
     return `calc(${percent}% - 4px)`;
   }, []);
 
-  // Store the latest notes with throttling to prevent excessive updates
+  // Store the latest notes with minimal delay optimization
   const addNoteRef = useRef<number>(0);
+  const lastFreqRef = useRef<number>(0);
+
   useEffect(() => {
     if (!freq) return;
 
-    // Throttle note additions to max 30fps
     const now = Date.now();
-    if (now - addNoteRef.current < 33) return;
+    const timeSinceLastUpdate = now - addNoteRef.current;
+    const freqChange = Math.abs(freq - lastFreqRef.current);
+
+    // Immediate update for significant frequency changes (low latency for pitch changes)
+    // Or regular throttling at 60fps for stable frequencies
+    const shouldUpdate = freqChange > 10 || timeSinceLastUpdate >= 16;
+
+    if (!shouldUpdate) return;
+
     addNoteRef.current = now;
+    lastFreqRef.current = freq;
 
     const note = frequencyToNote(freq);
     setLatestNotes((prev) => {
       const newNotes = [...prev, { note, freq, clarity }];
-      return newNotes.length > 300 ? newNotes.slice(-300) : newNotes;
+      // Reduce buffer size slightly for lower memory usage and faster processing
+      return newNotes.length > 250 ? newNotes.slice(-250) : newNotes;
     });
   }, [freq, clarity, frequencyToNote]);
 
@@ -154,14 +165,28 @@ const Tuner = React.memo(() => {
     };
   }, [bpm, metronomeEnabled, playMetronomeTick]);
 
+  // Current note display (immediate, no throttling for real-time feedback)
+  const currentNote = useMemo(
+    () => frequencyToNote(freq),
+    [freq, frequencyToNote]
+  );
+  const currentAccuracy = useMemo(
+    () => noteAccuracy(freq),
+    [freq, noteAccuracy]
+  );
+  const currentColor = useMemo(
+    () => accuracyColor(freq),
+    [freq, accuracyColor]
+  );
+
   return (
     <div className="p-4 w-full h-full text-[#eae1d6]">
       <div className="w-full h-1/3 flex flex-col justify-center items-center">
         <p className="text-xl">{freq ? `${freq.toFixed(2)} Hz` : '--'}</p>
-        <p className="text-8xl font-mono mt-2">{frequencyToNote(freq)}</p>
+        <p className="text-8xl font-mono mt-2">{currentNote}</p>
         <div className="flex gap-2 justify-center items-center">
-          <div className={`w-4 h-4 rounded-full ${accuracyColor(freq)}`} />
-          <p className="text-lg mt-2">{noteAccuracy(freq)}</p>
+          <div className={`w-4 h-4 rounded-full ${currentColor}`} />
+          <p className="text-lg mt-2">{currentAccuracy}</p>
         </div>
 
         {/* Controls */}
