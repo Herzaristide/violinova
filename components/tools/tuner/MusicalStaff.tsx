@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 interface MusicalStaffProps {
   notes: Array<{
@@ -141,8 +141,20 @@ const ALL_NOTES = [
 // Natural notes only (no sharps) for range selection
 const NATURAL_NOTES = ALL_NOTES.filter((note) => !note.includes('♯'));
 
-// Generate staff lines and positions based on selected range
-// Creates lines only for natural notes, sharp notes will be positioned between lines
+// Optimized note order lookup for performance
+const NOTE_ORDER = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const NOTE_ORDER_MAP = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
+
+// Pre-calculated flat to sharp conversion map
+const FLAT_TO_SHARP_MAP: { [key: string]: string } = {
+  Db: 'C#',
+  Eb: 'D#',
+  Gb: 'F#',
+  Ab: 'G#',
+  Bb: 'A#'
+};
+
+// Optimized staff generation with reduced iterations
 const generateStaffConfig = (lowNote: string, highNote: string) => {
   const lowIndex = NATURAL_NOTES.findIndex(
     (note) => note.replace('♯', '#') === lowNote.replace('♯', '#')
@@ -152,7 +164,6 @@ const generateStaffConfig = (lowNote: string, highNote: string) => {
   );
 
   if (lowIndex === -1 || highIndex === -1 || lowIndex >= highIndex) {
-    // Fallback to violin range
     return generateStaffConfig('G3', 'E7');
   }
 
@@ -160,53 +171,51 @@ const generateStaffConfig = (lowNote: string, highNote: string) => {
   const staffLines = [];
   const notePositions: { [key: string]: number } = {};
 
-  // Generate positions with spacing for natural notes only
+  // Optimized position calculation
   const totalNotes = rangeNotes.length;
-  const maxPosition = 90; // Use 90% of height to leave room for margins
-  const spacing = totalNotes > 1 ? (maxPosition - 10) / (totalNotes - 1) : 0;
+  const spacing = totalNotes > 1 ? 80 / (totalNotes - 1) : 0; // Pre-calculated: (90-10)/(totalNotes-1)
 
   rangeNotes.forEach((note, index) => {
-    // Invert the position: higher notes at top (lower %), lower notes at bottom (higher %)
-    const position = 90 - index * spacing; // Start at 90%, decrease by spacing
+    const position = 90 - index * spacing;
     const baseNote = note.replace('♯', '#');
 
     staffLines.push({ note: baseNote, position });
     notePositions[baseNote] = position;
   });
 
-  // Add positions for sharp notes (between natural notes)
-  ALL_NOTES.forEach((note) => {
-    if (note.includes('♯')) {
-      const baseNote = note.replace('♯', '#');
-      const naturalBelow = note.replace('♯', '').replace('#', '');
+  // Optimized sharp note positioning - only process notes in range
+  const startOctave = parseInt(rangeNotes[0].slice(1));
+  const endOctave = parseInt(rangeNotes[rangeNotes.length - 1].slice(1));
+
+  for (let octave = startOctave; octave <= endOctave; octave++) {
+    // Process only relevant sharps for current octave
+    ['C♯', 'D♯', 'F♯', 'G♯', 'A♯'].forEach((sharp) => {
+      const note = sharp + octave;
+      const baseNote = sharp.replace('♯', '#') + octave;
+      const naturalBelow = sharp.charAt(0) + octave;
       const naturalAbove = getNextNaturalNote(naturalBelow);
 
       const positionBelow = notePositions[naturalBelow];
       const positionAbove = notePositions[naturalAbove];
 
       if (positionBelow !== undefined && positionAbove !== undefined) {
-        // Position sharp note halfway between the two natural notes
-        notePositions[baseNote] = (positionBelow + positionAbove) / 2;
-        notePositions[note] = (positionBelow + positionAbove) / 2;
+        const sharpPosition = (positionBelow + positionAbove) * 0.5; // Optimized division
+        notePositions[baseNote] = sharpPosition;
+        notePositions[note] = sharpPosition;
       }
-    }
-  });
+    });
+  }
 
   return { staffLines, notePositions };
 };
 
-// Helper function to get the next natural note
+// Optimized helper function using lookup map
 const getNextNaturalNote = (note: string): string => {
-  const noteOrder = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  const currentIndex = noteOrder.indexOf(note.charAt(0));
+  const noteChar = note.charAt(0);
   const octave = parseInt(note.slice(1));
+  const index = NOTE_ORDER_MAP[noteChar as keyof typeof NOTE_ORDER_MAP];
 
-  if (currentIndex === 6) {
-    // B -> C of next octave
-    return `C${octave + 1}`;
-  } else {
-    return `${noteOrder[currentIndex + 1]}${octave}`;
-  }
+  return index === 6 ? `C${octave + 1}` : `${NOTE_ORDER[index + 1]}${octave}`;
 };
 
 const getAccidental = (note: string): string | null => {
@@ -224,60 +233,58 @@ export default function MusicalStaff({
   customHighNote = 'C6',
   onRangeChange
 }: MusicalStaffProps) {
-  // Get the range configuration
-  const range =
-    noteRange === 'custom'
-      ? { low: customLowNote, high: customHighNote, name: 'Custom Range' }
-      : NOTE_RANGES[noteRange];
-
-  // Generate dynamic staff configuration
-  const { staffLines, notePositions } = generateStaffConfig(
-    range.low,
-    range.high
+  // Memoized range configuration
+  const range = useMemo(
+    () =>
+      noteRange === 'custom'
+        ? { low: customLowNote, high: customHighNote, name: 'Custom Range' }
+        : NOTE_RANGES[noteRange],
+    [noteRange, customLowNote, customHighNote]
   );
 
-  // Updated getNotePosition function using dynamic positions
-  const getNotePosition = (note: string): number => {
-    const baseNote = note.replace(/[♯♭#b]/g, '');
-    const position = notePositions[baseNote];
+  // Memoized staff configuration - only recalculate when range changes
+  const { staffLines, notePositions } = useMemo(
+    () => generateStaffConfig(range.low, range.high),
+    [range.low, range.high]
+  );
 
-    // For sharp notes, use the pre-calculated position between natural notes
-    if (note.includes('♯') || note.includes('#')) {
-      return notePositions[note.replace('♯', '#')] || position || 50;
-    }
+  // Optimized note position function with memoization
+  const getNotePosition = useCallback(
+    (note: string): number => {
+      const baseNote = note.replace(/[♯♭#b]/g, '');
+      const position = notePositions[baseNote];
 
-    // For flat notes, treat them as the equivalent sharp
-    if (note.includes('♭') || note.includes('b')) {
-      // Convert flat to equivalent sharp
-      const equivalentSharp = convertFlatToSharp(note);
-      return notePositions[equivalentSharp] || position || 50;
-    }
+      if (note.includes('♯') || note.includes('#')) {
+        return notePositions[note.replace('♯', '#')] || position || 50;
+      }
 
-    return position || 50;
-  };
+      if (note.includes('♭') || note.includes('b')) {
+        const equivalentSharp = convertFlatToSharp(note);
+        return notePositions[equivalentSharp] || position || 50;
+      }
 
-  // Helper function to convert flat notes to equivalent sharps
-  const convertFlatToSharp = (flatNote: string): string => {
-    const flatToSharp: { [key: string]: string } = {
-      Db: 'C#',
-      Eb: 'D#',
-      Gb: 'F#',
-      Ab: 'G#',
-      Bb: 'A#'
-    };
+      return position || 50;
+    },
+    [notePositions]
+  );
 
+  // Optimized flat to sharp conversion using pre-calculated map
+  const convertFlatToSharp = useCallback((flatNote: string): string => {
     const noteBase = flatNote.replace(/[♭b]/g, '').replace(/\d+/g, '');
     const octave = flatNote.match(/\d+/)?.[0] || '';
 
-    if (flatToSharp[noteBase + 'b']) {
-      return flatToSharp[noteBase + 'b'] + octave;
-    }
+    return FLAT_TO_SHARP_MAP[noteBase + 'b'] + octave || flatNote;
+  }, []);
 
-    return flatNote;
-  };
+  // Memoized A4 position
+  const a4Position = useMemo(() => notePositions['A4'], [notePositions]);
 
-  // Find A4 position for reference line (if it exists in range)
-  const a4Position = notePositions['A4'];
+  // Memoized accidental function
+  const getAccidental = useCallback((note: string): string | null => {
+    if (note.includes('♯') || note.includes('#')) return '♯';
+    if (note.includes('♭') || note.includes('b')) return '♭';
+    return null;
+  }, []);
 
   return (
     <div className="relative w-full h-full backdrop-blur-sm bg-white/5 rounded-xl overflow-hidden border border-white/10 shadow-inner">
@@ -349,7 +356,7 @@ export default function MusicalStaff({
           </div>
         ))}
 
-        {/* Notes */}
+        {/* Notes - keeping filtering logic unchanged */}
         {notes.map((item, idx) => {
           if (item.clarity <= 0.7) return null;
 
