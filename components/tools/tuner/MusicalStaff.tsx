@@ -147,14 +147,28 @@ export default function MusicalStaff({
               }}
               title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
             />
-            {item.isTick && (
-              <div
-                className="absolute top-0 h-full border-l-2 border-blue-400 opacity-70"
-                style={{ left: '0', zIndex: 4 }}
-                title="Metronome Tick"
-              />
-            )}
           </div>
+        );
+      })}
+
+      {/* Metronome bars - full height lines crossing all staff lines */}
+      {notes.map((item, idx) => {
+        if (!item.isTick) return null;
+
+        return (
+          <div
+            key={`metronome-${idx}`}
+            className="absolute top-0 h-full opacity-80"
+            style={{
+              left: getNoteLeft(idx, notes.length),
+              zIndex: 5,
+              width: '3px',
+              background:
+                'linear-gradient(to bottom, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.8))',
+              borderLeft: '3px solid rgba(59, 130, 246, 0.9)'
+            }}
+            title="Metronome Tick"
+          />
         );
       })}
     </div>

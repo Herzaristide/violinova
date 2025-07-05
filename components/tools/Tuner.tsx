@@ -19,8 +19,13 @@ const Tuner = React.memo(() => {
   // Metronome state
   const [bpm, setBpm] = useState(60);
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
+  const [timeSignature, setTimeSignature] = useState('4/4');
+  const [accentEnabled, setAccentEnabled] = useState(true);
+  const [metronomeVolume, setMetronomeVolume] = useState(0.2);
+  const [metronomeSound, setMetronomeSound] = useState('click'); // 'click', 'beep', 'wood'
   const metronomeInterval = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const beatCountRef = useRef<number>(0);
 
   // Memoized helper functions to prevent recreating on every render
   const frequencyToNote = useMemo(
@@ -82,8 +87,8 @@ const Tuner = React.memo(() => {
     []
   );
 
-  // Memoized functions
-  const playMetronomeTick = useCallback(() => {
+  // Enhanced metronome tick sound with different options
+  const playMetronomeTick = useCallback((isAccent = false) => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
@@ -91,13 +96,28 @@ const Tuner = React.memo(() => {
     const ctx = audioCtxRef.current;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = 1200;
-    gain.gain.value = 0.2;
+    
+    // Different sounds based on selection
+    switch (metronomeSound) {
+      case 'beep':
+        osc.type = 'sine';
+        osc.frequency.value = isAccent ? 1200 : 800;
+        break;
+      case 'wood':
+        osc.type = 'triangle';
+        osc.frequency.value = isAccent ? 2000 : 1500;
+        break;
+      default: // 'click'
+        osc.type = 'square';
+        osc.frequency.value = isAccent ? 1200 : 1000;
+        break;
+    }
+    
+    gain.gain.value = isAccent ? metronomeVolume * 1.5 : metronomeVolume;
     osc.connect(gain).connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.07);
-  }, []);
+    osc.stop(ctx.currentTime + (isAccent ? 0.1 : 0.07));
+  }, [metronomeSound, metronomeVolume]);
 
   const getNoteLeft = useCallback((idx: number, total: number) => {
     const relativeIdx = idx - Math.max(0, total - 250); // Updated for smaller buffer
@@ -134,7 +154,7 @@ const Tuner = React.memo(() => {
     });
   }, [freq, clarity, frequencyToNote]);
 
-  // Optimized metronome effect
+  // Enhanced metronome effect with time signatures
   useEffect(() => {
     if (metronomeInterval.current) {
       clearInterval(metronomeInterval.current);
@@ -144,8 +164,15 @@ const Tuner = React.memo(() => {
     if (!metronomeEnabled) return;
 
     const interval = 60000 / bpm;
+    const beatsPerMeasure = parseInt(timeSignature.split('/')[0]);
+    beatCountRef.current = 0;
+
     metronomeInterval.current = setInterval(() => {
-      playMetronomeTick();
+      const isAccent = accentEnabled && (beatCountRef.current % beatsPerMeasure === 0);
+      playMetronomeTick(isAccent);
+      
+      beatCountRef.current = (beatCountRef.current + 1) % beatsPerMeasure;
+      
       setLatestNotes((prev) => {
         if (prev.length === 0) return prev;
         const newNotes = [...prev];
@@ -163,7 +190,7 @@ const Tuner = React.memo(() => {
         metronomeInterval.current = null;
       }
     };
-  }, [bpm, metronomeEnabled, playMetronomeTick]);
+  }, [bpm, metronomeEnabled, timeSignature, accentEnabled, playMetronomeTick]);
 
   // Current note display (immediate, no throttling for real-time feedback)
   const currentNote = useMemo(
@@ -189,27 +216,93 @@ const Tuner = React.memo(() => {
           <p className="text-lg mt-2">{currentAccuracy}</p>
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 mt-4">
-          <input
-            type="number"
-            min={20}
-            max={300}
-            value={bpm}
-            onChange={(e) => setBpm(Number(e.target.value))}
-            className="w-16 text-black rounded px-1 py-0.5"
-            title="Metronome BPM"
-          />
-          <button
-            onClick={() => setMetronomeEnabled(!metronomeEnabled)}
-            className={`px-3 py-1 rounded text-xs font-bold border ${
-              metronomeEnabled
-                ? 'bg-blue-500 border-blue-700 text-white'
-                : 'bg-gray-300 border-gray-400 text-gray-700'
-            }`}
-          >
-            {metronomeEnabled ? 'Stop' : 'Start'}
-          </button>
+        {/* Enhanced Metronome Controls */}
+        <div className="flex flex-col items-center gap-3 mt-4">
+          {/* Main controls row */}
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={20}
+              max={300}
+              value={bpm}
+              onChange={(e) => setBpm(Number(e.target.value))}
+              className="w-16 text-black rounded px-1 py-0.5"
+              title="Metronome BPM"
+            />
+            <span className="text-xs">BPM</span>
+            
+            <button
+              onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+              className={`px-3 py-1 rounded text-xs font-bold border ${
+                metronomeEnabled
+                  ? 'bg-blue-500 border-blue-700 text-white'
+                  : 'bg-gray-300 border-gray-400 text-gray-700'
+              }`}
+            >
+              {metronomeEnabled ? 'Stop' : 'Start'}
+            </button>
+          </div>
+
+          {/* Advanced controls row */}
+          <div className="flex items-center gap-4 text-xs">
+            {/* Time Signature */}
+            <div className="flex items-center gap-1">
+              <label>Time:</label>
+              <select
+                value={timeSignature}
+                onChange={(e) => setTimeSignature(e.target.value)}
+                className="text-black rounded px-1 py-0.5"
+              >
+                <option value="2/4">2/4</option>
+                <option value="3/4">3/4</option>
+                <option value="4/4">4/4</option>
+                <option value="6/8">6/8</option>
+                <option value="7/8">7/8</option>
+                <option value="9/8">9/8</option>
+                <option value="12/8">12/8</option>
+              </select>
+            </div>
+
+            {/* Accent */}
+            <label className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                checked={accentEnabled}
+                onChange={(e) => setAccentEnabled(e.target.checked)}
+                className="w-3 h-3"
+              />
+              Accent
+            </label>
+
+            {/* Sound Type */}
+            <div className="flex items-center gap-1">
+              <label>Sound:</label>
+              <select
+                value={metronomeSound}
+                onChange={(e) => setMetronomeSound(e.target.value)}
+                className="text-black rounded px-1 py-0.5"
+              >
+                <option value="click">Click</option>
+                <option value="beep">Beep</option>
+                <option value="wood">Wood</option>
+              </select>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-1">
+              <label>Vol:</label>
+              <input
+                type="range"
+                min="0.1"
+                max="0.5"
+                step="0.1"
+                value={metronomeVolume}
+                onChange={(e) => setMetronomeVolume(Number(e.target.value))}
+                className="w-12"
+                title={`Volume: ${Math.round(metronomeVolume * 100)}%`}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
