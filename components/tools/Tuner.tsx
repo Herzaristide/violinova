@@ -2,6 +2,7 @@
 
 import { usePitchDetection } from '../../utils/usePitchDetection';
 import { useEffect, useState, useRef } from 'react';
+import MusicalStaff from './tuner/MusicalStaff';
 
 function frequencyToNote(freq: any) {
   if (!freq) return '--';
@@ -112,11 +113,12 @@ function accuracyColor(freq: number | null) {
 export default function Tuner() {
   const { freq, clarity } = usePitchDetection();
   const [latestNotes, setLatestNotes] = useState<NoteType[]>([]);
+  const [showMusicalStaff, setShowMusicalStaff] = useState(true);
 
   // Metronome state
   const [bpm, setBpm] = useState(60);
   const [ticks, setTicks] = useState<number[]>([]);
-  const [metronomeEnabled, setMetronomeEnabled] = useState(true);
+  const [metronomeEnabled, setMetronomeEnabled] = useState(false);
   const metronomeInterval = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -237,56 +239,70 @@ export default function Tuner() {
           >
             {metronomeEnabled ? 'Disable Metronome' : 'Enable Metronome'}
           </button>
+          <button
+            onClick={() => setShowMusicalStaff((v) => !v)}
+            className="ml-4 px-3 py-1 rounded text-xs font-bold border bg-purple-500 border-purple-700 text-white hover:bg-purple-600"
+          >
+            {showMusicalStaff ? 'Show Chart View' : 'Show Musical Staff'}
+          </button>
         </div>
       </div>
       <div className="text-xs w-full h-full text-[#eae1d6] rounded p-2 text-left">
-        <div className="relative w-full h-2/3 rounded border overflow-hidden">
-          {/* Draw horizontal lines for each note position */}
-          {notes.map((note, idx) => (
-            <div
-              key={idx}
-              className="absolute left-0 w-full border-t border-dashed border-gray-300/25"
-              style={{
-                bottom: `${100 - (idx / (notes.length - 1)) * 100}%`,
-                zIndex: 0
-              }}
-            >
-              <span className="absolute left-2 -top-3 text-gray-400 text-xs select-none">
-                {note}
-              </span>
-            </div>
-          ))}
-          {/* Draw the notes as small colored dots, and a vertical line if isTick */}
-          {latestNotes.map((item, idx) => (
-            <>
-              {item.clarity > 0.9 && (
-                <div
-                  key={`note-${idx}`}
-                  className={`absolute left-0 w-1 h-3 rounded-sm ${accuracyColor(
-                    item.freq
-                  )}`}
-                  style={{
-                    bottom: `${noteToY(item.note)}%`,
-                    left: getNoteLeft(idx, latestNotes.length), // <-- use the new function
-                    zIndex: 1
-                  }}
-                  title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
-                />
-              )}
-              {item.isTick && (
-                <div
-                  key={`tick-${idx}`}
-                  className="absolute left-0 top-0 h-full border-l-2 border-blue-400 opacity-70"
-                  style={{
-                    left: getNoteLeft(idx, latestNotes.length), // <-- use the new function
-                    zIndex: 10
-                  }}
-                  title="Metronome Tick"
-                />
-              )}
-            </>
-          ))}
-        </div>
+        {showMusicalStaff ? (
+          <MusicalStaff
+            notes={latestNotes}
+            accuracyColor={accuracyColor}
+            getNoteLeft={getNoteLeft}
+          />
+        ) : (
+          <div className="relative w-full h-2/3 rounded border overflow-hidden">
+            {/* Draw horizontal lines for each note position */}
+            {notes.map((note, idx) => (
+              <div
+                key={idx}
+                className="absolute left-0 w-full border-t border-dashed border-gray-300/25"
+                style={{
+                  bottom: `${100 - (idx / (notes.length - 1)) * 100}%`,
+                  zIndex: 0
+                }}
+              >
+                <span className="absolute left-2 -top-3 text-gray-400 text-xs select-none">
+                  {note}
+                </span>
+              </div>
+            ))}
+            {/* Draw the notes as small colored dots, and a vertical line if isTick */}
+            {latestNotes.map((item, idx) => (
+              <>
+                {item.clarity > 0.9 && (
+                  <div
+                    key={`note-${idx}`}
+                    className={`absolute left-0 w-1 h-3 rounded-sm ${accuracyColor(
+                      item.freq
+                    )}`}
+                    style={{
+                      bottom: `${noteToY(item.note)}%`,
+                      left: getNoteLeft(idx, latestNotes.length), // <-- use the new function
+                      zIndex: 1
+                    }}
+                    title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
+                  />
+                )}
+                {item.isTick && (
+                  <div
+                    key={`tick-${idx}`}
+                    className="absolute left-0 top-0 h-full border-l-2 border-blue-400 opacity-70"
+                    style={{
+                      left: getNoteLeft(idx, latestNotes.length), // <-- use the new function
+                      zIndex: 10
+                    }}
+                    title="Metronome Tick"
+                  />
+                )}
+              </>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
