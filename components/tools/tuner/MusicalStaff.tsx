@@ -14,55 +14,64 @@ interface MusicalStaffProps {
 }
 
 // Simplified staff configuration focused on violin range (G3-E7)
+// Spacing adjusted to match note size (8px = w-2 h-2)
 const STAFF_LINES = [
-  { note: 'E7', position: 15 },
-  { note: 'C7', position: 20 },
-  { note: 'A6', position: 25 },
-  { note: 'F6', position: 30 },
-  { note: 'D6', position: 35 },
-  { note: 'B5', position: 40 },
-  { note: 'G5', position: 45 },
-  { note: 'E5', position: 50 }, // Traditional treble top line
-  { note: 'C5', position: 55 },
-  { note: 'A4', position: 60 }, // A440 reference
-  { note: 'F4', position: 65 },
-  { note: 'D4', position: 70 }, // Traditional treble bottom line
-  { note: 'B3', position: 75 },
-  { note: 'G3', position: 80 }, // Violin low G
-  { note: 'E3', position: 85 }
+  { note: 'E7', position: 8 },
+  { note: 'D7', position: 12 },
+  { note: 'C7', position: 16 },
+  { note: 'B6', position: 20 },
+  { note: 'A6', position: 24 },
+  { note: 'G6', position: 28 },
+  { note: 'F6', position: 32 },
+  { note: 'E6', position: 36 },
+  { note: 'D6', position: 40 },
+  { note: 'C6', position: 44 },
+  { note: 'B5', position: 48 },
+  { note: 'A5', position: 52 },
+  { note: 'G5', position: 56 }, // Traditional treble top line
+  { note: 'F5', position: 60 },
+  { note: 'E5', position: 64 }, // Traditional treble top line
+  { note: 'D5', position: 68 },
+  { note: 'C5', position: 72 },
+  { note: 'B4', position: 76 },
+  { note: 'A4', position: 80 }, // A440 reference
+  { note: 'G4', position: 84 },
+  { note: 'F4', position: 88 },
+  { note: 'E4', position: 92 },
+  { note: 'D4', position: 96 } // Traditional treble bottom line
 ];
 
 const NOTE_POSITIONS: { [key: string]: number } = {
-  // High range
-  E7: 15,
-  D7: 17.5,
-  C7: 20,
-  B6: 22.5,
-  A6: 25,
-  G6: 27.5,
-  F6: 30,
-  E6: 32.5,
-  D6: 35,
-  C6: 37.5,
-  B5: 40,
-  A5: 42.5,
-  G5: 45,
-  F5: 47.5,
-  E5: 50,
-  D5: 52.5,
-  C5: 55,
-  B4: 57.5,
-  A4: 60,
-  G4: 62.5,
-  F4: 65,
-  E4: 67.5,
-  D4: 70,
-  C4: 72.5,
-  B3: 75,
-  A3: 77.5,
-  G3: 80,
-  F3: 82.5,
-  E3: 85
+  // High range - 4% spacing between each semitone to match 8px note size
+  E7: 8,
+  D7: 12,
+  C7: 16,
+  B6: 20,
+  A6: 24,
+  G6: 28,
+  F6: 32,
+  E6: 36,
+  D6: 40,
+  C6: 44,
+  B5: 48,
+  A5: 52,
+  G5: 56,
+  F5: 60,
+  E5: 64,
+  D5: 68,
+  C5: 72,
+  B4: 76,
+  A4: 80,
+  G4: 84,
+  F4: 88,
+  E4: 92,
+  D4: 96,
+  C4: 100,
+  B3: 104,
+  A3: 108,
+  G3: 112,
+  F3: 116,
+  E3: 120
 };
 
 const getNotePosition = (note: string): number => {
@@ -191,7 +200,7 @@ export default function MusicalStaff({
         {/* Frequency reference line (A4 = 440Hz) */}
         <div
           className="absolute left-0 w-full border-t-2 border-yellow-400/30 z-5"
-          style={{ top: '60%' }}
+          style={{ top: '80%' }}
         >
           <span className="absolute left-2 -top-2 text-xs text-yellow-400/80 select-none">
             A4 (440Hz)
