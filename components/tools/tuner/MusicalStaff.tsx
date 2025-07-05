@@ -13,56 +13,56 @@ interface MusicalStaffProps {
   getNoteLeft: (idx: number, total: number) => string;
 }
 
-// Musical staff configuration
+// Musical staff configuration with perfectly equal spacing
 const STAFF_LINES = [
-  { note: 'F5', position: 30 },
-  { note: 'D5', position: 40 },
-  { note: 'B4', position: 50 },
-  { note: 'G4', position: 60 },
-  { note: 'E4', position: 70 }
+  { note: 'F5', position: 25 }, // Top line
+  { note: 'D5', position: 35 }, // 4th line
+  { note: 'B4', position: 45 }, // 3rd line (middle)
+  { note: 'G4', position: 55 }, // 2nd line
+  { note: 'E4', position: 65 } // Bottom line
 ];
 
 const LEDGER_LINES = [
-  { note: 'C6', position: 10 },
-  { note: 'A5', position: 20 },
-  { note: 'C4', position: 80 },
-  { note: 'A3', position: 90 },
-  { note: 'F3', position: 100 }
+  { note: 'C6', position: 5 }, // High ledger line
+  { note: 'A5', position: 15 }, // Above staff ledger
+  { note: 'C4', position: 75 }, // Below staff ledger
+  { note: 'A3', position: 85 }, // Below staff ledger
+  { note: 'F3', position: 95 } // Low ledger line
 ];
 
 const NOTE_POSITIONS: { [key: string]: number } = {
   C7: 0,
-  B6: 5,
-  A6: 10,
-  G6: 15,
-  F6: 20,
-  E6: 25,
-  D6: 30,
-  C6: 10,
-  B5: 15,
-  A5: 20,
-  G5: 25,
-  F5: 30,
-  E5: 35,
-  D5: 40,
-  C5: 45,
-  B4: 50,
-  A4: 55,
-  G4: 60,
-  F4: 65,
-  E4: 70,
-  D4: 75,
-  C4: 80,
-  B3: 85,
-  A3: 90,
-  G3: 95,
-  F3: 100,
-  E3: 105,
-  D3: 110,
-  C3: 115,
-  B2: 120,
-  A2: 125,
-  G2: 130
+  B6: 2.5,
+  A6: 5, // A6 ledger line
+  G6: 7.5,
+  F6: 10,
+  E6: 12.5,
+  D6: 15, // D6 ledger line
+  C6: 5, // High C ledger line
+  B5: 10, // Space above A5
+  A5: 15, // A5 ledger line
+  G5: 20, // Space above F5
+  F5: 25, // Top staff line
+  E5: 30, // Space between F5 and D5
+  D5: 35, // 4th staff line
+  C5: 40, // Space between D5 and B4
+  B4: 45, // 3rd staff line (middle)
+  A4: 50, // Space between B4 and G4
+  G4: 55, // 2nd staff line
+  F4: 60, // Space between G4 and E4
+  E4: 65, // Bottom staff line
+  D4: 70, // Space below E4
+  C4: 75, // C4 ledger line
+  B3: 80, // Space below C4
+  A3: 85, // A3 ledger line
+  G3: 90, // Space below A3
+  F3: 95, // F3 ledger line
+  E3: 100, // Space below F3
+  D3: 105, // Below staff
+  C3: 110, // Below staff
+  B2: 115, // Below staff
+  A2: 120, // Below staff
+  G2: 125 // Below staff
 };
 
 const getNotePosition = (note: string): number => {
@@ -110,7 +110,7 @@ export default function MusicalStaff({
       ))}
 
       {/* Treble clef */}
-      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-5xl font-bold text-black select-none">
+      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[140px] font-bold text-black select-none">
         𝄞
       </div>
 
@@ -138,13 +138,7 @@ export default function MusicalStaff({
               </span>
             )}
             <div
-              className={`w-5 h-4 rounded-full border-2 border-black ${accuracyColor(
-                item.freq
-              )}`}
-              style={{
-                transform: 'rotate(-15deg)',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-              }}
+              className={`w-1 h-6 ${accuracyColor(item.freq)}`}
               title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
             />
           </div>
