@@ -222,53 +222,50 @@ const Tuner = React.memo(() => {
         </div>
 
         {/* Note Display */}
-        <div className="relative mt-4">
-          <div className="backdrop-blur-xl bg-white/5 rounded-3xl p-6 border border-white/10 shadow-2xl">
-            <p className="text-7xl font-mono text-center text-white drop-shadow-lg">
+        <div className="relative mt-3">
+          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10 shadow-2xl">
+            <p className="text-5xl font-mono text-center text-white drop-shadow-lg">
               {currentNote}
             </p>
           </div>
         </div>
 
         {/* Accuracy Indicator */}
-        <div className="flex gap-4 justify-center items-center mt-4">
+        <div className="flex gap-3 justify-center items-center mt-3">
           <div className="relative">
             <div
-              className={`w-6 h-6 rounded-full ${currentColor} shadow-lg ring-2 ring-white/30`}
+              className={`w-5 h-5 rounded-full ${currentColor} shadow-lg ring-2 ring-white/30`}
             >
               <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
             </div>
           </div>
-          <div className="backdrop-blur-md bg-white/10 rounded-xl px-4 py-2 border border-white/20">
-            <p className="text-lg font-medium text-white/90">
+          <div className="backdrop-blur-md bg-white/10 rounded-lg px-3 py-1 border border-white/20">
+            <p className="text-sm font-medium text-white/90">
               {currentAccuracy} cents
             </p>
           </div>
         </div>
 
-        {/* Enhanced Metronome Controls */}
-        <div className="backdrop-blur-md bg-white/5 rounded-2xl p-4 border border-white/10 shadow-lg mt-4 w-full max-w-2xl">
-          <div className="flex flex-col items-center gap-4">
-            {/* Main controls row */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={20}
-                  max={300}
-                  value={bpm}
-                  onChange={(e) => setBpm(Number(e.target.value))}
-                  className="w-20 h-10 text-white bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200"
-                  title="Metronome BPM"
-                />
-                <span className="text-sm font-medium text-white/80">BPM</span>
-              </div>
-
+        {/* Compact Metronome Controls */}
+        <div className="backdrop-blur-md bg-white/5 rounded-xl p-2 border border-white/10 shadow-lg mt-2 w-full max-w-4xl">
+          <div className="flex items-center justify-center gap-3 flex-wrap text-xs">
+            {/* BPM and Start/Stop */}
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={20}
+                max={300}
+                value={bpm}
+                onChange={(e) => setBpm(Number(e.target.value))}
+                className="w-14 h-7 text-white bg-white/10 backdrop-blur-md rounded-lg px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200 text-xs"
+                title="Metronome BPM"
+              />
+              <span className="text-xs text-white/80">BPM</span>
               <button
                 onClick={() => setMetronomeEnabled(!metronomeEnabled)}
-                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 transform hover:scale-105 ${
+                className={`px-3 py-1 rounded-lg font-medium text-xs transition-all duration-200 ${
                   metronomeEnabled
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
                     : 'bg-white/10 backdrop-blur-md border border-white/20 text-white/90 hover:bg-white/15'
                 }`}
               >
@@ -276,85 +273,82 @@ const Tuner = React.memo(() => {
               </button>
             </div>
 
-            {/* Advanced controls row */}
-            <div className="flex items-center gap-4 text-sm flex-wrap justify-center">
-              {/* Time Signature */}
-              <div className="flex items-center gap-2">
-                <label className="text-white/80 font-medium">Time:</label>
-                <select
-                  value={timeSignature}
-                  onChange={(e) => setTimeSignature(e.target.value)}
-                  className="bg-white/10 backdrop-blur-md text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200"
-                >
-                  <option value="2/4" className="bg-gray-800">
-                    2/4
-                  </option>
-                  <option value="3/4" className="bg-gray-800">
-                    3/4
-                  </option>
-                  <option value="4/4" className="bg-gray-800">
-                    4/4
-                  </option>
-                  <option value="6/8" className="bg-gray-800">
-                    6/8
-                  </option>
-                  <option value="7/8" className="bg-gray-800">
-                    7/8
-                  </option>
-                  <option value="9/8" className="bg-gray-800">
-                    9/8
-                  </option>
-                  <option value="12/8" className="bg-gray-800">
-                    12/8
-                  </option>
-                </select>
-              </div>
+            {/* Time Signature */}
+            <div className="flex items-center gap-1">
+              <label className="text-white/80 text-xs">Time:</label>
+              <select
+                value={timeSignature}
+                onChange={(e) => setTimeSignature(e.target.value)}
+                className="bg-white/10 backdrop-blur-md text-white rounded-md px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200 text-xs"
+              >
+                <option value="2/4" className="bg-gray-800">
+                  2/4
+                </option>
+                <option value="3/4" className="bg-gray-800">
+                  3/4
+                </option>
+                <option value="4/4" className="bg-gray-800">
+                  4/4
+                </option>
+                <option value="6/8" className="bg-gray-800">
+                  6/8
+                </option>
+                <option value="7/8" className="bg-gray-800">
+                  7/8
+                </option>
+                <option value="9/8" className="bg-gray-800">
+                  9/8
+                </option>
+                <option value="12/8" className="bg-gray-800">
+                  12/8
+                </option>
+              </select>
+            </div>
 
-              {/* Accent */}
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={accentEnabled}
-                  onChange={(e) => setAccentEnabled(e.target.checked)}
-                  className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-blue-500 focus:ring-2"
-                />
-                <span className="text-white/80 font-medium">Accent</span>
-              </label>
+            {/* Accent */}
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={accentEnabled}
+                onChange={(e) => setAccentEnabled(e.target.checked)}
+                className="w-3 h-3 rounded border-white/20 bg-white/10 text-blue-500"
+              />
+              <span className="text-white/80 text-xs">Accent</span>
+            </label>
 
-              {/* Sound Type */}
-              <div className="flex items-center gap-2">
-                <label className="text-white/80 font-medium">Sound:</label>
-                <select
-                  value={metronomeSound}
-                  onChange={(e) => setMetronomeSound(e.target.value)}
-                  className="bg-white/10 backdrop-blur-md text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200"
-                >
-                  <option value="click" className="bg-gray-800">
-                    Click
-                  </option>
-                  <option value="beep" className="bg-gray-800">
-                    Beep
-                  </option>
-                  <option value="wood" className="bg-gray-800">
-                    Wood
-                  </option>
-                </select>
-              </div>
+            {/* Sound Type */}
+            <div className="flex items-center gap-1">
+              <label className="text-white/80 text-xs">Sound:</label>
+              <select
+                value={metronomeSound}
+                onChange={(e) => setMetronomeSound(e.target.value)}
+                className="bg-white/10 backdrop-blur-md text-white rounded-md px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200 text-xs"
+              >
+                <option value="click" className="bg-gray-800">
+                  Click
+                </option>
+                <option value="beep" className="bg-gray-800">
+                  Beep
+                </option>
+                <option value="wood" className="bg-gray-800">
+                  Wood
+                </option>
+              </select>
+            </div>
 
-              {/* Volume */}
-              <div className="flex items-center gap-2">
-                <label className="text-white/80 font-medium">Vol:</label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="0.5"
-                  step="0.1"
-                  value={metronomeVolume}
-                  onChange={(e) => setMetronomeVolume(Number(e.target.value))}
-                  className="w-16 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
-                  title={`Volume: ${Math.round(metronomeVolume * 100)}%`}
-                />
-              </div>
+            {/* Volume */}
+            <div className="flex items-center gap-1">
+              <label className="text-white/80 text-xs">Vol:</label>
+              <input
+                type="range"
+                min="0.1"
+                max="0.5"
+                step="0.1"
+                value={metronomeVolume}
+                onChange={(e) => setMetronomeVolume(Number(e.target.value))}
+                className="w-12 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+                title={`Volume: ${Math.round(metronomeVolume * 100)}%`}
+              />
             </div>
           </div>
         </div>
