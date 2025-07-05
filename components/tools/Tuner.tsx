@@ -88,36 +88,39 @@ const Tuner = React.memo(() => {
   );
 
   // Enhanced metronome tick sound with different options
-  const playMetronomeTick = useCallback((isAccent = false) => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-    }
-    const ctx = audioCtxRef.current;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    // Different sounds based on selection
-    switch (metronomeSound) {
-      case 'beep':
-        osc.type = 'sine';
-        osc.frequency.value = isAccent ? 1200 : 800;
-        break;
-      case 'wood':
-        osc.type = 'triangle';
-        osc.frequency.value = isAccent ? 2000 : 1500;
-        break;
-      default: // 'click'
-        osc.type = 'square';
-        osc.frequency.value = isAccent ? 1200 : 1000;
-        break;
-    }
-    
-    gain.gain.value = isAccent ? metronomeVolume * 1.5 : metronomeVolume;
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + (isAccent ? 0.1 : 0.07));
-  }, [metronomeSound, metronomeVolume]);
+  const playMetronomeTick = useCallback(
+    (isAccent = false) => {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      // Different sounds based on selection
+      switch (metronomeSound) {
+        case 'beep':
+          osc.type = 'sine';
+          osc.frequency.value = isAccent ? 1200 : 800;
+          break;
+        case 'wood':
+          osc.type = 'triangle';
+          osc.frequency.value = isAccent ? 2000 : 1500;
+          break;
+        default: // 'click'
+          osc.type = 'square';
+          osc.frequency.value = isAccent ? 1200 : 1000;
+          break;
+      }
+
+      gain.gain.value = isAccent ? metronomeVolume * 1.5 : metronomeVolume;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + (isAccent ? 0.1 : 0.07));
+    },
+    [metronomeSound, metronomeVolume]
+  );
 
   const getNoteLeft = useCallback((idx: number, total: number) => {
     const relativeIdx = idx - Math.max(0, total - 250); // Updated for smaller buffer
@@ -168,11 +171,12 @@ const Tuner = React.memo(() => {
     beatCountRef.current = 0;
 
     metronomeInterval.current = setInterval(() => {
-      const isAccent = accentEnabled && (beatCountRef.current % beatsPerMeasure === 0);
+      const isAccent =
+        accentEnabled && beatCountRef.current % beatsPerMeasure === 0;
       playMetronomeTick(isAccent);
-      
+
       beatCountRef.current = (beatCountRef.current + 1) % beatsPerMeasure;
-      
+
       setLatestNotes((prev) => {
         if (prev.length === 0) return prev;
         const newNotes = [...prev];
@@ -207,8 +211,8 @@ const Tuner = React.memo(() => {
   );
 
   return (
-    <div className="p-4 w-full h-full text-[#eae1d6]">
-      <div className="w-full h-1/3 flex flex-col justify-center items-center">
+    <div className="p-4 w-full h-full text-[#eae1d6] flex flex-col">
+      <div className="w-full flex flex-col justify-center items-center">
         <p className="text-xl">{freq ? `${freq.toFixed(2)} Hz` : '--'}</p>
         <p className="text-8xl font-mono mt-2">{currentNote}</p>
         <div className="flex gap-2 justify-center items-center">
@@ -230,7 +234,7 @@ const Tuner = React.memo(() => {
               title="Metronome BPM"
             />
             <span className="text-xs">BPM</span>
-            
+
             <button
               onClick={() => setMetronomeEnabled(!metronomeEnabled)}
               className={`px-3 py-1 rounded text-xs font-bold border ${
@@ -306,7 +310,7 @@ const Tuner = React.memo(() => {
         </div>
       </div>
 
-      <div className="w-full h-2/3 rounded p-2">
+      <div className="flex-1 w-full rounded p-2 mt-4">
         <MusicalStaff
           notes={latestNotes}
           accuracyColor={accuracyColor}
