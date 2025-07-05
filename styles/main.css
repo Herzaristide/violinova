@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
   font-family: avenir;
   src: url(fonts/AvenirNextRoundedStd-Med.woff2);
@@ -13,11 +12,10 @@ html {
   touch-action: manipulation;
   font-feature-settings: 'case' 1, 'rlig' 1, 'calt' 0;
   background: linear-gradient(#2f2e324a, #2f2e324a), url('/images/bg.svg');
-  background-color: #2f2e32 ;
+  background-color: #2f2e32;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
-
 }
 
 html,
@@ -25,7 +23,7 @@ body {
   box-sizing: border-box;
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
-  }
+}
 
 a {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -48,51 +46,105 @@ a {
   background-color: #eae1d6;
 }
 
-.pro svg path{
+.pro svg path {
   fill: black;
 }
-.pro svg text{
+.pro svg text {
   fill: black;
   font-family: avenir;
 }
 
-.pro .abcjs-note{
+.pro .abcjs-note {
   fill: black;
 }
 
-.pro .abcjs-note_playing{
+.pro .abcjs-note_playing {
   fill: red;
 }
 
-.pro .abcjs-note_selected{
+.pro .abcjs-note_selected {
   fill: red;
 }
-
-
 
 .scroll {
-  direction:rtl;
+  direction: rtl;
 }
 
-.scroll::-webkit-scrollbar-track
-{
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	border-radius: 10px;
+.scroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
 }
 
-.scroll::-webkit-scrollbar
-{
-	width: 12px;
+.scroll::-webkit-scrollbar {
+  width: 12px;
 }
 
-.scroll::-webkit-scrollbar-thumb
-{
-	border-radius: 10px;
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-	background-color: #D56942;
+.scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #d56942;
+}
+
+/* Modern slider styling for tuner */
+.slider {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1)
+  );
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+}
+
+/* Glass morphism effect enhancements */
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .markdown > * {
   all: revert;
-  direction:ltr;
+  direction: ltr;
 }
