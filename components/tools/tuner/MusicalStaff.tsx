@@ -13,94 +13,56 @@ interface MusicalStaffProps {
   getNoteLeft: (idx: number, total: number) => string;
 }
 
-// Musical staff configuration for full range A0-C8 with equal spacing
+// Simplified staff configuration focused on violin range (G3-E7)
 const STAFF_LINES = [
-  { note: 'C8', position: 5 }, // Highest line
-  { note: 'A7', position: 10 },
-  { note: 'F7', position: 15 },
-  { note: 'D7', position: 20 },
-  { note: 'B6', position: 25 },
-  { note: 'G6', position: 30 },
-  { note: 'E6', position: 35 },
-  { note: 'C6', position: 40 },
-  { note: 'A5', position: 45 },
-  { note: 'F5', position: 50 }, // Traditional top line
-  { note: 'D5', position: 55 }, // 4th line
-  { note: 'B4', position: 60 }, // 3rd line (middle)
-  { note: 'G4', position: 65 }, // 2nd line
-  { note: 'E4', position: 70 }, // Traditional bottom line
-  { note: 'C4', position: 75 },
-  { note: 'A3', position: 80 },
-  { note: 'F3', position: 85 },
-  { note: 'D3', position: 90 },
-  { note: 'B2', position: 95 },
-  { note: 'G2', position: 100 },
-  { note: 'E2', position: 105 },
-  { note: 'C2', position: 110 },
-  { note: 'A1', position: 115 },
-  { note: 'F1', position: 120 },
-  { note: 'D1', position: 125 },
-  { note: 'B0', position: 130 },
-  { note: 'A0', position: 135 } // Lowest line
+  { note: 'E7', position: 15 },
+  { note: 'C7', position: 20 },
+  { note: 'A6', position: 25 },
+  { note: 'F6', position: 30 },
+  { note: 'D6', position: 35 },
+  { note: 'B5', position: 40 },
+  { note: 'G5', position: 45 },
+  { note: 'E5', position: 50 }, // Traditional treble top line
+  { note: 'C5', position: 55 },
+  { note: 'A4', position: 60 }, // A440 reference
+  { note: 'F4', position: 65 },
+  { note: 'D4', position: 70 }, // Traditional treble bottom line
+  { note: 'B3', position: 75 },
+  { note: 'G3', position: 80 }, // Violin low G
+  { note: 'E3', position: 85 }
 ];
 
 const NOTE_POSITIONS: { [key: string]: number } = {
-  // Octave 8
-  C8: 5,
-  B7: 7.5,
-  A7: 10,
-  G7: 12.5,
-  F7: 15,
-  E7: 17.5,
-  D7: 20,
-  C7: 22.5,
-  // Octave 6-7
-  B6: 25,
-  A6: 27.5,
-  G6: 30,
-  F6: 32.5,
-  E6: 35,
-  D6: 37.5,
-  C6: 40,
-  B5: 42.5,
-  A5: 45,
-  G5: 47.5,
-  // Traditional treble staff (F5-E4)
-  F5: 50,
-  E5: 52.5,
-  D5: 55,
-  C5: 57.5,
-  B4: 60,
-  A4: 62.5,
-  G4: 65,
-  F4: 67.5,
-  E4: 70,
-  // Extended lower range
-  D4: 72.5,
-  C4: 75,
-  B3: 77.5,
-  A3: 80,
-  G3: 82.5,
-  F3: 85,
-  E3: 87.5,
-  D3: 90,
-  C3: 92.5,
-  B2: 95,
-  A2: 97.5,
-  G2: 100,
-  F2: 102.5,
-  E2: 105,
-  D2: 107.5,
-  C2: 110,
-  B1: 112.5,
-  A1: 115,
-  G1: 117.5,
-  F1: 120,
-  E1: 122.5,
-  D1: 125,
-  C1: 127.5,
-  B0: 130,
-  A0: 135
+  // High range
+  E7: 15,
+  D7: 17.5,
+  C7: 20,
+  B6: 22.5,
+  A6: 25,
+  G6: 27.5,
+  F6: 30,
+  E6: 32.5,
+  D6: 35,
+  C6: 37.5,
+  B5: 40,
+  A5: 42.5,
+  G5: 45,
+  F5: 47.5,
+  E5: 50,
+  D5: 52.5,
+  C5: 55,
+  B4: 57.5,
+  A4: 60,
+  G4: 62.5,
+  F4: 65,
+  E4: 67.5,
+  D4: 70,
+  C4: 72.5,
+  B3: 75,
+  A3: 77.5,
+  G3: 80,
+  F3: 82.5,
+  E3: 85
 };
 
 const getNotePosition = (note: string): number => {
@@ -109,13 +71,13 @@ const getNotePosition = (note: string): number => {
 
   // If the note includes a sharp or flat, adjust position slightly
   if (note.includes('♯') || note.includes('#')) {
-    return position ? position - 1.25 : 50; // Slightly higher for sharps
+    return position ? position - 1 : 60; // Slightly higher for sharps
   }
   if (note.includes('♭') || note.includes('b')) {
-    return position ? position + 1.25 : 50; // Slightly lower for flats
+    return position ? position + 1 : 60; // Slightly lower for flats
   }
 
-  return position || 50;
+  return position || 60;
 };
 
 const getAccidental = (note: string): string | null => {
@@ -130,76 +92,112 @@ export default function MusicalStaff({
   getNoteLeft
 }: MusicalStaffProps) {
   return (
-    <div className="relative w-full h-96 bg-white rounded-lg overflow-hidden border-2 border-gray-300">
-      {/* Range indicator */}
-      <div className="absolute top-2 left-2 text-xs text-gray-600 select-none">
-        Range: A0 - C8 (Full Piano Range)
+    <div className="relative w-full h-full backdrop-blur-sm bg-white/5 rounded-xl overflow-hidden border border-white/10 shadow-inner">
+      {/* Header */}
+      <div className="absolute top-2 left-3 right-3 flex justify-between items-center text-xs text-white/70 select-none z-10">
+        <span>Violin Range: G3 - E7</span>
+        <span className="text-white/50">Notes: {notes.length}</span>
       </div>
 
-      {/* Extended staff lines for A0-C8 range */}
-      {STAFF_LINES.map((line, idx) => (
-        <div
-          key={idx}
-          className="absolute left-0 w-full border-t border-gray-400"
-          style={{ top: `${line.position}%` }}
-        >
-          <span className="absolute right-2 -top-3 text-xs text-gray-600 select-none">
-            {line.note}
-          </span>
-        </div>
-      ))}
-
-      {/* Notes */}
-      {notes.map((item, idx) => {
-        if (item.clarity <= 0.9) return null;
-
-        const position = getNotePosition(item.note);
-        const accidental = getAccidental(item.note);
-
-        return (
+      {/* Staff container */}
+      <div className="relative w-full h-full pt-8 pb-4">
+        {/* Staff lines */}
+        {STAFF_LINES.map((line, idx) => (
           <div
             key={idx}
-            className="absolute"
-            style={{
-              top: `${position}%`,
-              left: getNoteLeft(idx, notes.length),
-              transform: 'translateY(-50%)',
-              zIndex: 3
-            }}
+            className="absolute left-0 w-full"
+            style={{ top: `${line.position}%` }}
           >
-            {accidental && (
-              <span className="absolute -left-6 top-1/2 transform -translate-y-1/2 text-xl font-bold text-black">
-                {accidental}
-              </span>
-            )}
+            {/* Main staff line */}
             <div
-              className={`w-0.5 h-4 ${accuracyColor(item.freq)}`}
-              title={`${item.note} (${item.freq.toFixed(1)} Hz)`}
+              className={`w-full border-t ${
+                ['E5', 'C5', 'A4', 'F4', 'D4'].includes(line.note)
+                  ? 'border-white/40'
+                  : 'border-white/20'
+              }`}
             />
+            {/* Note label */}
+            <span className="absolute right-2 -top-2 text-xs text-white/60 select-none font-mono">
+              {line.note}
+            </span>
           </div>
-        );
-      })}
+        ))}
 
-      {/* Metronome bars - full height lines crossing all staff lines */}
-      {notes.map((item, idx) => {
-        if (!item.isTick) return null;
+        {/* Notes */}
+        {notes.map((item, idx) => {
+          if (item.clarity <= 0.7) return null;
 
-        return (
-          <div
-            key={`metronome-${idx}`}
-            className="absolute top-0 h-full opacity-80"
-            style={{
-              left: getNoteLeft(idx, notes.length),
-              zIndex: 5,
-              width: '3px',
-              background:
-                'linear-gradient(to bottom, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.8))',
-              borderLeft: '3px solid rgba(59, 130, 246, 0.9)'
-            }}
-            title="Metronome Tick"
-          />
-        );
-      })}
+          const position = getNotePosition(item.note);
+          const accidental = getAccidental(item.note);
+          const colorClass = accuracyColor(item.freq);
+
+          return (
+            <div
+              key={idx}
+              className="absolute"
+              style={{
+                top: `${position}%`,
+                left: getNoteLeft(idx, notes.length),
+                transform: 'translateY(-50%)',
+                zIndex: 20
+              }}
+            >
+              {/* Accidental */}
+              {accidental && (
+                <span className="absolute -left-5 top-1/2 transform -translate-y-1/2 text-sm font-bold text-white/80">
+                  {accidental}
+                </span>
+              )}
+
+              {/* Note dot */}
+              <div
+                className={`w-2 h-2 rounded-full ${colorClass} shadow-lg border border-white/30`}
+                title={`${item.note} (${item.freq.toFixed(1)} Hz, ${(
+                  item.clarity * 100
+                ).toFixed(0)}% clarity)`}
+              >
+                {/* Glow effect for high clarity notes */}
+                {item.clarity > 0.9 && (
+                  <div
+                    className={`absolute inset-0 rounded-full ${colorClass} opacity-50 animate-pulse`}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Metronome tick lines */}
+        {notes.map((item, idx) => {
+          if (!item.isTick) return null;
+
+          return (
+            <div
+              key={`metronome-${idx}`}
+              className="absolute top-0 h-full opacity-60"
+              style={{
+                left: getNoteLeft(idx, notes.length),
+                zIndex: 10,
+                width: '2px',
+                background:
+                  'linear-gradient(to bottom, rgba(96, 165, 250, 0.8), rgba(59, 130, 246, 0.6))',
+                boxShadow: '0 0 4px rgba(96, 165, 250, 0.5)'
+              }}
+              title="Metronome Beat"
+            />
+          );
+        })}
+
+        {/* Frequency reference line (A4 = 440Hz) */}
+        <div
+          className="absolute left-0 w-full border-t-2 border-yellow-400/30 z-5"
+          style={{ top: '60%' }}
+        >
+          <span className="absolute left-2 -top-2 text-xs text-yellow-400/80 select-none">
+            A4 (440Hz)
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
