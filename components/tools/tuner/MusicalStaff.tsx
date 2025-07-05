@@ -154,8 +154,22 @@ const FLAT_TO_SHARP_MAP: { [key: string]: string } = {
   Bb: 'A#'
 };
 
+// Type definitions for staff configuration
+interface StaffLine {
+  note: string;
+  position: number;
+}
+
+interface StaffConfig {
+  staffLines: StaffLine[];
+  notePositions: { [key: string]: number };
+}
+
 // Optimized staff generation with reduced iterations
-const generateStaffConfig = (lowNote: string, highNote: string) => {
+const generateStaffConfig = (
+  lowNote: string,
+  highNote: string
+): StaffConfig => {
   const lowIndex = NATURAL_NOTES.findIndex(
     (note) => note.replace('♯', '#') === lowNote.replace('♯', '#')
   );
@@ -168,7 +182,7 @@ const generateStaffConfig = (lowNote: string, highNote: string) => {
   }
 
   const rangeNotes = NATURAL_NOTES.slice(lowIndex, highIndex + 1);
-  const staffLines = [];
+  const staffLines: StaffLine[] = [];
   const notePositions: { [key: string]: number } = {};
 
   // Optimized position calculation
