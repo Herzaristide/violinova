@@ -30,6 +30,8 @@ const Tuner = React.memo(() => {
   >('violin');
   const [customLowNote, setCustomLowNote] = useState('C3');
   const [customHighNote, setCustomHighNote] = useState('C6');
+  const [scrollingEnabled, setScrollingEnabled] = useState(true);
+  const [noteCount, setNoteCount] = useState(250); // Number of notes to display
 
   const metronomeInterval = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -127,11 +129,14 @@ const Tuner = React.memo(() => {
     [metronomeSound, metronomeVolume]
   );
 
-  // Optimized note positioning calculation
-  const getNoteLeft = useCallback((idx: number, total: number) => {
-    const relativeIdx = idx - Math.max(0, total - 250);
-    return `calc(${relativeIdx * 0.32}% - 4px)`; // Pre-calculated: (relativeIdx / 250) * 80
-  }, []);
+  // Optimized note positioning calculation with dynamic buffer size
+  const getNoteLeft = useCallback(
+    (idx: number, total: number) => {
+      const relativeIdx = idx - Math.max(0, total - noteCount);
+      return `calc(${(relativeIdx / noteCount) * 80}% - 4px)`;
+    },
+    [noteCount]
+  );
 
   // Memoized range change handler
   const handleRangeChange = useCallback((lowNote: string, highNote: string) => {
@@ -147,13 +152,13 @@ const Tuner = React.memo(() => {
   const updateThrottleRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!freq) return;
+    if (!freq || !scrollingEnabled) return;
 
-    const now = performance.now(); // More precise than Date.now()
+    const now = performance.now();
     const timeSinceLastUpdate = now - addNoteRef.current;
     const freqChange = Math.abs(freq - lastFreqRef.current);
 
-    // Optimized throttling logic
+    // Standard throttling at 60fps
     if (freqChange <= 10 && timeSinceLastUpdate < 16) return;
 
     addNoteRef.current = now;
@@ -162,9 +167,12 @@ const Tuner = React.memo(() => {
     const note = frequencyToNote(freq);
     setLatestNotes((prev) => {
       const newNotes = [...prev, { note, freq, clarity }];
-      return newNotes.length > 250 ? newNotes.slice(-250) : newNotes;
+      // Use the user-defined note count
+      return newNotes.length > noteCount
+        ? newNotes.slice(-noteCount)
+        : newNotes;
     });
-  }, [freq, clarity, frequencyToNote]);
+  }, [freq, clarity, frequencyToNote, scrollingEnabled, noteCount]);
 
   // Optimized metronome effect with pre-calculated interval
   useEffect(() => {
@@ -382,6 +390,38 @@ const Tuner = React.memo(() => {
                   Custom
                 </option>
               </select>
+            </div>
+
+            {/* Scrolling Control */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setScrollingEnabled(!scrollingEnabled)}
+                className={`px-3 py-1 rounded-lg font-medium text-xs transition-all duration-200 ${
+                  scrollingEnabled
+                    ? 'bg-white/10 backdrop-blur-md border border-white/20 text-white/90 hover:bg-white/15'
+                    : 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md'
+                }`}
+                title={
+                  scrollingEnabled ? 'Pause scrolling' : 'Resume scrolling'
+                }
+              >
+                {scrollingEnabled ? 'Pause' : 'Play'}
+              </button>
+            </div>
+
+            {/* Scrolling Speed */}
+            <div className="flex items-center gap-1">
+              <label className="text-white/80 text-xs">Notes:</label>
+              <input
+                type="number"
+                min={10}
+                max={1000}
+                value={noteCount}
+                onChange={(e) => setNoteCount(Number(e.target.value))}
+                className="w-16 h-7 text-white bg-white/10 backdrop-blur-md rounded-lg px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none transition-all duration-200 text-xs"
+                disabled={!scrollingEnabled}
+                title={`Number of notes to display: ${noteCount}`}
+              />
             </div>
           </div>
         </div>
