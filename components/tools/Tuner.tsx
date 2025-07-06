@@ -223,7 +223,7 @@ const Tuner = React.memo(() => {
       <div className="w-full flex flex-col justify-center items-center flex-shrink-0 gap-2">
         {/* Frequency Display */}
         <div className="backdrop-blur-md bg-white/10 rounded-2xl px-6 py-3 border border-white/20 shadow-lg w-32">
-          <p className="text-xl font-light text-center text-white/90">
+          <p className="text-xl font-light text-center text-white/90 truncate">
             {freq ? `${freq.toFixed(0)} Hz` : '--'}
           </p>
         </div>
