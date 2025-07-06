@@ -75,7 +75,7 @@ const Tuner = React.memo(() => {
       const nearest = Math.round(semitones);
       const nearestFreq = A4 * Math.pow(2, nearest / 12);
       const cents = 1200 * Math.log2(freq / nearestFreq);
-      return `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
+      return `${cents > 0 ? '+' : ''}${cents.toFixed(0)}`;
     },
     [calculateSemitones]
   );
@@ -220,17 +220,17 @@ const Tuner = React.memo(() => {
   return (
     <div className="p-4 w-full h-full text-[#eae1d6] flex flex-col overflow-hidden">
       {/* Main Tuner Display */}
-      <div className="w-full flex flex-col justify-center items-center flex-shrink-0">
+      <div className="w-full flex flex-col justify-center items-center flex-shrink-0 gap-2">
         {/* Frequency Display */}
-        <div className="backdrop-blur-md bg-white/10 rounded-2xl px-6 py-3 border border-white/20 shadow-lg">
+        <div className="backdrop-blur-md bg-white/10 rounded-2xl px-6 py-3 border border-white/20 shadow-lg w-32">
           <p className="text-xl font-light text-center text-white/90">
-            {freq ? `${freq.toFixed(2)} Hz` : '--'}
+            {freq ? `${freq.toFixed(0)} Hz` : '--'}
           </p>
         </div>
 
         {/* Note Display */}
-        <div className="relative mt-3">
-          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10 shadow-2xl">
+        <div className="relative">
+          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10 shadow-2xl w-32">
             <p className="text-5xl font-mono text-center text-white drop-shadow-lg">
               {currentNote}
             </p>
@@ -238,7 +238,7 @@ const Tuner = React.memo(() => {
         </div>
 
         {/* Accuracy Indicator */}
-        <div className="flex gap-3 justify-center items-center mt-3">
+        <div className="flex gap-3 justify-between items-center w-30">
           <div className="relative">
             <div
               className={`w-5 h-5 rounded-full ${currentColor} shadow-lg ring-2 ring-white/30`}
@@ -246,9 +246,9 @@ const Tuner = React.memo(() => {
               <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
             </div>
           </div>
-          <div className="backdrop-blur-md bg-white/10 rounded-lg px-3 py-1 border border-white/20">
+          <div className="backdrop-blur-md bg-white/10 rounded-lg px-3 py-1 border border-white/20 w-16 text-center">
             <p className="text-sm font-medium text-white/90">
-              {currentAccuracy} cents
+              {currentAccuracy}
             </p>
           </div>
         </div>
