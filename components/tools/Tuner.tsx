@@ -225,6 +225,30 @@ const Tuner = React.memo(() => {
     [freq, accuracyColor]
   );
 
+  // Calculate color ratio for visible notes
+  const colorRatio = useMemo(() => {
+    if (!latestNotes.length) return null;
+    let green = 0,
+      yellow = 0,
+      orange = 0,
+      red = 0;
+    latestNotes.forEach((n) => {
+      const color = accuracyColor(n.freq);
+      if (color.includes('green')) green++;
+      else if (color.includes('yellow')) yellow++;
+      else if (color.includes('orange')) orange++;
+      else if (color.includes('red')) red++;
+    });
+    const total = green + yellow + orange + red;
+    return {
+      green: (green / total) * 100,
+      yellow: (yellow / total) * 100,
+      orange: (orange / total) * 100,
+      red: (red / total) * 100,
+      total
+    };
+  }, [latestNotes, accuracyColor]);
+
   return (
     <div className="p-4 w-full h-full text-[#eae1d6] flex flex-col overflow-hidden">
       {/* Main Tuner Display */}
@@ -235,6 +259,31 @@ const Tuner = React.memo(() => {
             {freq ? `${freq.toFixed(0)} Hz` : '--'}
           </p>
         </div>
+
+        {/* Note Color Ratio Display */}
+        {colorRatio && (
+          <div className="flex gap-2 mt-2 text-xs">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-3 rounded-full bg-green-500 border border-white/30"></span>
+              {colorRatio.green.toFixed(0)}%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-3 rounded-full bg-yellow-400 border border-white/30"></span>
+              {colorRatio.yellow.toFixed(0)}%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-3 rounded-full bg-orange-400 border border-white/30"></span>
+              {colorRatio.orange.toFixed(0)}%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-3 rounded-full bg-red-500 border border-white/30"></span>
+              {colorRatio.red.toFixed(0)}%
+            </span>
+            <span className="ml-2 text-white/40">
+              ({colorRatio.total} notes)
+            </span>
+          </div>
+        )}
 
         {/* Note Display */}
         <div className="relative">
